@@ -1,0 +1,53 @@
+# Python bytecode and tooling caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+.venv-*/
+.vevn/
+venv/
+env/
+ENV/
+
+# Jupyter and local IDE files
+.ipynb_checkpoints/
+.vscode/
+.idea/
+*.swp
+*.swo
+**/.git-standalone-backup/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.kaggle/
+
+# Downloaded datasets and image collections
+/Data/
+/easyocr_data/
+/medical-prescription-ocr/data/raw/
+/medical-prescription-ocr/data/images/
+
+# Generated training data and Python caches
+/EasyOCR/trainer/all_data/
+/EasyOCR/trainer/__pycache__/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Application/runtime leftovers
+*.log
+*.sqlite
+*.db

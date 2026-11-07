@@ -1,0 +1,9 @@
+easyocr>=1.7
+pytesseract>=0.3.10
+opencv-python>=4.8
+numpy>=1.24
+pandas>=2.0
+Pillow>=10.0
+matplotlib>=3.7
+torch>=2.0
+python-Levenshtein>=0.21

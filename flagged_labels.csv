@@ -1,0 +1,11 @@
+filename,words,pred,ctc_pred,split
+231.png,Dinafex,Fixal,Fixal,medical_test
+291.png,Fenadin,Fexo,Fexo,medical_test
+298.png,Fenadin,Fexo,Fexo,medical_test
+315.png,Fexo,Fenadin,Fenadin,medical_test
+316.png,Fexo,Nexcap,Nexcap,medical_test
+338.png,Fixal,Fenadin,Fenadin,medical_test
+568.png,Nexcap,Opton,Opton,medical_test
+629.png,Opton,Nexum,Nexum,medical_test
+711.png,Sergel,Maxpro,Maxpro,medical_test
+718.png,Sergel,Maxpro,Maxpro,medical_test

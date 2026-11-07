@@ -1,0 +1,5 @@
+streamlit
+pillow
+pyyaml
+numpy
+# torch: keep your existing CUDA build

@@ -1,0 +1,180 @@
+[500/10000] Train loss: 0.44523, Valid loss: 0.57670, Elapsed_time: 98.41267
+Current_accuracy : 56.282, Current_norm_ED  : 0.8783
+Best_accuracy    : 56.282, Best_norm_ED     : 0.8783
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Alatrol                   | Alotrol                   | 0.1860	False
+Omastin                   | Omastin                   | 0.3419	True
+--------------------------------------------------------------------------------
+[1000/10000] Train loss: 0.02427, Valid loss: 0.62030, Elapsed_time: 207.16313
+Current_accuracy : 60.641, Current_norm_ED  : 0.8889
+Best_accuracy    : 60.641, Best_norm_ED     : 0.8889
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Ketozol                   | Ketozol                   | 0.4964	True
+Telfast                   | Telfast                   | 0.8481	True
+--------------------------------------------------------------------------------
+[1500/10000] Train loss: 0.00242, Valid loss: 0.68803, Elapsed_time: 310.73617
+Current_accuracy : 62.436, Current_norm_ED  : 0.8905
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8905
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Esoral                    | Esoral                    | 0.8050	True
+Flamyd                    | Plamyd                    | 0.2945	False
+--------------------------------------------------------------------------------
+[2000/10000] Train loss: 0.00069, Valid loss: 0.72525, Elapsed_time: 417.10388
+Current_accuracy : 62.179, Current_norm_ED  : 0.8921
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Bicozin                   | Bicozin                   | 0.5320	True
+Maxima                    | Maxima                    | 0.9776	True
+--------------------------------------------------------------------------------
+[2500/10000] Train loss: 0.00026, Valid loss: 0.73635, Elapsed_time: 519.19430
+Current_accuracy : 61.923, Current_norm_ED  : 0.8921
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Axodin                    | Axodin                    | 0.4530	True
+Ketotab                   | Ketotb                    | 0.4940	False
+--------------------------------------------------------------------------------
+[3000/10000] Train loss: 0.00017, Valid loss: 0.76422, Elapsed_time: 621.35905
+Current_accuracy : 61.795, Current_norm_ED  : 0.8911
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Montene                   | Montene                   | 0.8697	True
+Dinafex                   | Dinafex                   | 0.9660	True
+--------------------------------------------------------------------------------
+[3500/10000] Train loss: 0.00013, Valid loss: 0.77038, Elapsed_time: 729.15870
+Current_accuracy : 62.051, Current_norm_ED  : 0.8918
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Denixil                   | Denixil                   | 0.6279	True
+Napa Extend               | Nape Exlend               | 0.3190	False
+--------------------------------------------------------------------------------
+[4000/10000] Train loss: 0.00011, Valid loss: 0.78324, Elapsed_time: 834.81223
+Current_accuracy : 61.923, Current_norm_ED  : 0.8912
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Conaz                     | Conaz                     | 0.9281	True
+Montene                   | Montene                   | 0.9979	True
+--------------------------------------------------------------------------------
+[4500/10000] Train loss: 0.00009, Valid loss: 0.80393, Elapsed_time: 937.80965
+Current_accuracy : 61.923, Current_norm_ED  : 0.8914
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Monas                     | Monas                     | 0.9874	True
+Napa Extend               | Napa Exlendl              | 0.1660	False
+--------------------------------------------------------------------------------
+[5000/10000] Train loss: 0.00008, Valid loss: 0.80446, Elapsed_time: 1045.61935
+Current_accuracy : 62.179, Current_norm_ED  : 0.8910
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Dinafex                   | Dinafex                   | 0.9008	True
+Montene                   | Montene                   | 0.7384	True
+--------------------------------------------------------------------------------
+[5500/10000] Train loss: 0.00007, Valid loss: 0.86789, Elapsed_time: 1148.33819
+Current_accuracy : 62.308, Current_norm_ED  : 0.8919
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Maxpro                    | MaxproMuPszomg            | 0.6112	False
+Atrizin                   | Atrizin                   | 0.6565	True
+--------------------------------------------------------------------------------
+[6000/10000] Train loss: 0.00006, Valid loss: 0.81323, Elapsed_time: 1250.72056
+Current_accuracy : 62.051, Current_norm_ED  : 0.8912
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Ketoral                   | Kettorcal                 | 0.6946	False
+Cetisoft                  | Cetisoft                  | 0.9864	True
+--------------------------------------------------------------------------------
+[6500/10000] Train loss: 0.00006, Valid loss: 0.82066, Elapsed_time: 1940.64422
+Current_accuracy : 61.795, Current_norm_ED  : 0.8912
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Cetisoft                  | Cetisoft                  | 0.5114	True
+Esoral                    | Esoval                    | 0.5454	False
+--------------------------------------------------------------------------------
+[7000/10000] Train loss: 0.00005, Valid loss: 0.81561, Elapsed_time: 2046.58963
+Current_accuracy : 62.051, Current_norm_ED  : 0.8908
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Conaz                     | Conaz                     | 0.6032	True
+Lucan-R                   | Lucan-R                   | 0.9295	True
+--------------------------------------------------------------------------------
+[7500/10000] Train loss: 0.00005, Valid loss: 0.85347, Elapsed_time: 2153.32391
+Current_accuracy : 62.051, Current_norm_ED  : 0.8912
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Ketoral                   | Ketoral                   | 0.9611	True
+Fixal                     | Fixal                     | 0.8387	True
+--------------------------------------------------------------------------------
+[8000/10000] Train loss: 0.00004, Valid loss: 0.85654, Elapsed_time: 2260.67214
+Current_accuracy : 62.179, Current_norm_ED  : 0.8916
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Conaz                     | Contat                    | 0.8180	False
+Nexum                     | Nexum                     | 0.8551	True
+--------------------------------------------------------------------------------
+[8500/10000] Train loss: 0.00004, Valid loss: 0.83095, Elapsed_time: 2366.90483
+Current_accuracy : 62.179, Current_norm_ED  : 0.8918
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Nizoder                   | Nizoder                   | 0.8164	True
+Ketotab                   | Ketotab                   | 0.5450	True
+--------------------------------------------------------------------------------
+[9000/10000] Train loss: 0.00004, Valid loss: 0.83203, Elapsed_time: 2474.02723
+Current_accuracy : 61.667, Current_norm_ED  : 0.8909
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Beklo                     | Beklo                     | 0.8661	True
+Telfast                   | Telfast                   | 0.5041	True
+--------------------------------------------------------------------------------
+[9500/10000] Train loss: 0.00004, Valid loss: 0.83803, Elapsed_time: 2581.77416
+Current_accuracy : 62.051, Current_norm_ED  : 0.8915
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Romycin                   | Romycin                   | 0.7061	True
+Rivotril                  | Rivotril                  | 0.9628	True
+--------------------------------------------------------------------------------
+[10000/10000] Train loss: 0.00003, Valid loss: 0.86438, Elapsed_time: 2694.36715
+Current_accuracy : 61.923, Current_norm_ED  : 0.8918
+Best_accuracy    : 62.436, Best_norm_ED     : 0.8921
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Baclofen                  | Baclofen                  | 0.6625	True
+Bacmax                    | Bacmax                    | 0.7063	True
+--------------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+Fine-tuning clearly helps. Raw CER drops from 0.567 to 0.129. The 8.6% vs 9.9% case-insensitive figures show capitalization isn’t the reason the baseline does so poorly.
+Vocabulary scoring alone gets the pretrained model to 76%. That is a substantial part of the 96.7%, so the paper should present vocabulary scoring and fine-tuning as two contributions. Fine-tuning adds about 20 points on top of the vocabulary step (76.0% to 96.7%).
+Run 1 and the augmented run are not separable on this test set. Their intervals overlap in every row (for example 96.5% [95.1, 97.8] vs 96.7% [95.4, 97.8]), so I would not claim augmentation improved the result. It did reduce overfitting (train loss no longer near zero), which you can report separately.
+The intervals are optimistic. The bootstrap treats images as independent, and there are 60 per name from a limited handwriting pool.
+The vocabulary-scored CER of 0.025 isn’t a character-reading measure. A wrong pick is a whole wrong name, so it mostly reflects the 3.3% of wrong picks.
+A pipeline difference to mention. The zero-shot row uses EasyOCR’s own recognize() preprocessing, with its default contrast adjustment. The scored rows use the plain preprocessing from the trainer. That’s fair for a baseline, but state it in the methods.
+These numbers still include the mislabeled rows. Fix them first, then re-run before reporting final figures.
+Your model does not transfer to these photos. Raw CER is 0.68 here, against 0.13 on its own test set. The 96.7% figure holds only for images that look like your training data (clean scanned word crops). That gap is a legitimate finding, and the paper should report it as such, in a table that shows both in-distribution and out-of-distribution results.
+Fine-tuning still helps, since raw CER falls from 0.979 to 0.679 against the off-the-shelf model. The vocabulary step helps a lot too (5.7% to 43.7%).
+The uncertainty is large. 43.7% of 87 images is roughly ±10 points on its own, and more once you account for several photos of the same names. The A-vs-B difference (4 images) is noise.
+Vocab A is the optimistic case, since the right name is always in the list.

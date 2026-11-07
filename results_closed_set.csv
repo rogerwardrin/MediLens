@@ -1,0 +1,7 @@
+system,n,exact %,"exact, case-insens. %",CER
+"EasyOCR pretrained, zero-shot (raw)",780,"8.6 [6.7, 10.8]",9.9,"0.567 [0.543, 0.589]"
+EasyOCR pretrained + vocab scoring,780,"76.0 [72.9, 79.1]",76.0,"0.192 [0.166, 0.216]"
+"Fine-tuned, run 1 (raw)",780,"54.7 [51.2, 58.1]",54.9,"0.136 [0.123, 0.150]"
+"Fine-tuned, run 1 + vocab scoring",780,"96.5 [95.1, 97.8]",96.5,"0.025 [0.016, 0.036]"
+"Fine-tuned, augmented (raw)",780,"57.4 [54.0, 61.0]",57.4,"0.129 [0.115, 0.143]"
+"Fine-tuned, augmented + vocab scoring",780,"96.7 [95.4, 97.8]",96.7,"0.025 [0.016, 0.035]"

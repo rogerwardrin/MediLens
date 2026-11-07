@@ -1,0 +1,409 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\title{A Hybrid OCR Pipeline for Extracting Structured Information from Medical Prescriptions}
+
+\author{
+\IEEEauthorblockN{Medical Prescription OCR Research Team}
+\IEEEauthorblockA{\textit{Medical Prescription OCR Project}\\
+Educational Research Prototype}
+\and
+\IEEEauthorblockN{Sumit Mund}
+\IEEEauthorblockA{\textit{Medical Prescription OCR Project}\\
+Educational Research Prototype}
+\and
+\IEEEauthorblockN{Swapnaraj Mohanty}
+\IEEEauthorblockA{\textit{Medical Prescription OCR Project}\\
+Educational Research Prototype}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Medical prescriptions contain clinically important information such as medicine
+names, dosage quantities, and administration frequencies, but their visual
+formats vary considerably across printed and handwritten documents. This paper
+presents the design of an educational medical-prescription optical character
+recognition (OCR) pipeline that combines image preprocessing, EasyOCR, a
+Tesseract fallback, and rule-based field extraction. The implementation converts
+input images into multiple grayscale representations, performs OCR with a
+GPU-aware EasyOCR reader, groups detected text boxes into lines, and invokes
+Tesseract when the primary result is short or insufficiently confident. Extracted
+text is then mapped to candidate medicine, dosage, and frequency fields using
+regular expressions. Character error rate and word error rate are provided for
+evaluation. The paper describes the implemented architecture, algorithms,
+evaluation protocol, limitations, and safety requirements. No clinical
+performance claims are made because the current repository does not contain a
+completed, reproducible benchmark report.
+\end{abstract}
+
+\begin{IEEEkeywords}
+medical prescription, optical character recognition, EasyOCR, Tesseract,
+image preprocessing, information extraction
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Prescription digitization can reduce manual transcription effort and make
+medication information easier to search and review. However, prescription
+images present several challenges: variable illumination, skew, sensor noise,
+different writing styles, mixed layouts, and ambiguous medical abbreviations.
+Recognition errors are especially important because a visually plausible
+output can still contain an incorrect medicine or dosage.
+
+This project develops a modular OCR pipeline for prescription images. The
+implemented system uses OpenCV for preprocessing, EasyOCR as the primary text
+recognizer, Tesseract as a secondary recognizer, and lightweight regular
+expressions for extracting structured candidates. The design prioritizes
+inspectable intermediate stages and explicit confidence-based fallback behavior
+over opaque end-to-end predictions. The implementation uses established
+computer-vision and OCR components \cite{opencv,easyocr,tesseract}.
+
+The contributions of this work are:
+\begin{enumerate}
+    \item a staged preprocessing pipeline that preserves intermediate image
+    representations for inspection;
+    \item a reusable OCR interface with lazy model loading and optional GPU
+    execution;
+    \item a fallback strategy that combines OCR confidence and recognized-text
+    length;
+    \item a transparent rule-based extractor for medicine, dosage, and
+    frequency candidates; and
+    \item an evaluation framework based on character and word error rates.
+\end{enumerate}
+
+The system is an educational prototype and is not intended for clinical
+decision-making, dispensing, or autonomous prescription interpretation.
+
+\section{Related Problem and Design Motivation}
+\label{sec:motivation}
+
+Prescription OCR is not equivalent to generic document transcription. The
+system must preserve short tokens, units, abbreviations, and numbers while
+handling text that may be handwritten or spatially irregular. A single OCR
+engine can fail on a particular image condition, so the project uses two
+recognizers with different operational characteristics. EasyOCR provides
+bounding boxes and confidence values suitable for line reconstruction, while
+Tesseract supplies an independent fallback path.
+
+The implementation also separates recognition from field extraction. This
+separation makes it possible to inspect raw OCR text before applying
+domain-specific heuristics, and it allows future work to replace the extractor
+without changing image processing or OCR interfaces.
+
+\section{System Architecture}
+\label{sec:architecture}
+
+The complete workflow is shown conceptually in Fig.~\ref{fig:pipeline}.
+Images are indexed and opened as RGB data, converted to grayscale, optionally
+deskewed, denoised, and binarized. OCR is then attempted using EasyOCR.
+Tesseract is invoked only when the primary result does not meet the configured
+confidence and length requirements. Finally, the selected text is passed to the
+rule-based field extractor.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox{0.92\columnwidth}{
+\centering
+\vspace{0.35cm}
+Image loading $\rightarrow$ preprocessing $\rightarrow$ EasyOCR\\
+$\downarrow$ low confidence/short text $\rightarrow$ Tesseract fallback\\
+$\rightarrow$ field extraction $\rightarrow$ CER/WER evaluation
+\vspace{0.35cm}
+}}
+\caption{Implemented prescription OCR workflow.}
+\label{fig:pipeline}
+\end{figure}
+
+The repository is organized into source modules for data access, preprocessing,
+OCR, extraction, and metrics. Three notebooks support data preparation,
+preprocessing inspection, and OCR evaluation. Gold-label CSV files are stored
+under the \texttt{data} directory.
+
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Data Access and Image Representation}
+\label{sec:data}
+
+The data utility module recursively indexes images with PNG, JPEG, and WebP
+extensions. It maps each base filename to a path and opens images using
+Pillow, converting them to RGB. Gold annotations are represented as grouped
+records containing the fields \texttt{medicine}, \texttt{dosage}, and
+\texttt{frequency}.
+
+The current project includes development and test gold-label CSV files and
+notebooks for generating dataset splits. The repository documentation describes
+a synthetic prescription dataset workflow, but this paper does not treat the
+described split sizes as measured experimental results.
+
+The supplied training-validation notebook validates the EasyOCR trainer
+manifests before model training. It checks that each label file has the
+\texttt{filename} and \texttt{words} columns, that the number of labels equals
+the number of PNG images, and that every referenced image exists. The validated
+manifest counts are shown in Table~\ref{tab:dataset}.
+
+\begin{table}[t]
+\centering
+\caption{Validated training and validation manifests.}
+\label{tab:dataset}
+\begin{tabular}{lrr}
+\hline
+\textbf{Split} & \textbf{Samples} & \textbf{Validation checks}\\
+\hline
+\texttt{medical\_train} & 3,120 & 3\\
+\texttt{medical\_val} & 780 & 3\\
+\hline
+\end{tabular}
+\end{table}
+
+These counts describe manifest validation only; they are not OCR accuracy,
+loss, or generalization results.
+
+\subsection{Image Preprocessing}
+\label{sec:preprocessing}
+
+The preprocessing function returns a dictionary of stages so that downstream
+experiments can compare OCR performance on different representations. A
+Pillow image is converted to a BGR NumPy array before OpenCV operations.
+The image is converted to grayscale and resized so that its longest side is
+approximately 1600 pixels while preserving its aspect ratio. Cubic
+interpolation is used when enlarging and area interpolation when reducing.
+Images whose scale is already within five percent of the target are left
+unchanged.
+
+The resized grayscale image is optionally deskewed. Deskewing estimates the
+orientation of foreground pixels using a minimum-area rectangle and ignores
+tiny or suspicious rotations. Non-Local Means denoising then reduces speckles
+and sensor noise. Finally, Gaussian adaptive thresholding produces a binary
+image designed to handle uneven lighting and shadows. The default stage keys
+are \texttt{gray}, \texttt{resized}, \texttt{denoised}, and \texttt{binary};
+\texttt{deskewed} is included when deskewing is enabled.
+
+\subsection{EasyOCR Recognition}
+\label{sec:easyocr}
+
+EasyOCR is loaded lazily through a module-level reader cache. On the first
+request, the implementation detects CUDA availability through PyTorch unless
+the caller explicitly supplies a GPU choice. Subsequent requests reuse the
+reader, avoiding repeated model initialization.
+
+EasyOCR returns detected regions as bounding boxes, text, and confidence
+values. The intended line-grouping procedure computes the horizontal position,
+vertical center, and height of each region. Regions with sufficiently similar
+vertical centers are grouped into a line, and each line is sorted from left to
+right. The grouped lines are joined with newline separators. The EasyOCR
+confidence reported by the pipeline is the arithmetic mean of the individual
+region confidences.
+
+\subsection{Tesseract Fallback}
+\label{sec:tesseract}
+
+Tesseract is configured with:
+
+\begin{verbatim}
+--oem 3 --psm 6
+\end{verbatim}
+
+The Tesseract path obtains word confidence values through
+\texttt{image\_to\_data} and obtains line text through
+\texttt{image\_to\_string}. Tesseract confidence percentages are normalized to
+the interval $[0,1]$ by division by 100. Empty or invalid confidence entries
+are excluded.
+
+The fallback controller first executes EasyOCR. It returns that result when
+confidence is at least 0.5 and the recognized text contains at least 20
+characters by default. Otherwise, it executes Tesseract and chooses the result
+with the larger score:
+
+\begin{equation}
+S(r) = C(r)\min(L(r), 200),
+\label{eq:fallback}
+\end{equation}
+
+where $C(r)$ is the normalized confidence and $L(r)$ is the length of the
+recognized text. This score rewards confidence while preventing unusually long
+outputs from dominating without bound. When fallback processing is used, the
+reported elapsed time includes both OCR calls and the result includes a
+\texttt{fallback\_used} flag.
+
+\subsection{Rule-Based Information Extraction}
+\label{sec:extraction}
+
+The extractor removes blank lines and examines each remaining line. Dosage
+candidates are identified with a case-insensitive pattern consisting of a
+number followed by one of the units \texttt{mg}, \texttt{ml}, \texttt{mcg},
+\texttt{g}, or \texttt{iu}. Frequency candidates include patterns such as
+\texttt{2x daily}, \texttt{daily}, \texttt{times}, \texttt{bd}, \texttt{tds},
+\texttt{od}, and \texttt{hs}. Lines longer than three characters that contain no
+digits are treated as medicine-name candidates.
+
+The extractor returns three lists:
+
+\begin{verbatim}
+{
+    "medicine": [...],
+    "dosage": [...],
+    "frequency": [...]
+}
+\end{verbatim}
+
+These are candidates rather than validated medication instructions. The
+current implementation does not link a dosage and frequency to a specific
+medicine, correct OCR spelling, or verify a medicine against a clinical
+database.
+
+\section{Evaluation Protocol}
+\label{sec:evaluation}
+
+\subsection{Recognition Metrics}
+
+The project provides character error rate (CER) and word error rate (WER).
+CER is computed from normalized Levenshtein distance \cite{levenshtein}:
+
+\begin{equation}
+\mathrm{CER}(p,t)=\frac{d_{\mathrm{Lev}}(p,t)}{|t|},
+\label{eq:cer}
+\end{equation}
+
+where $p$ is the prediction and $t$ is the reference text. WER is estimated
+by splitting both strings into words and computing one minus the
+\texttt{SequenceMatcher} similarity ratio:
+
+\begin{equation}
+\mathrm{WER}(p,t)=1-\mathrm{SequenceMatcher}(p,t).
+\label{eq:wer}
+\end{equation}
+
+Lower values indicate better agreement. Empty-reference behavior is explicitly
+defined in the implementation: an empty prediction receives zero error, while
+a non-empty prediction receives one.
+
+\subsection{Proposed Experimental Comparisons}
+
+The notebooks support comparisons among:
+
+\begin{enumerate}
+    \item EasyOCR on each preprocessing stage;
+    \item Tesseract on each preprocessing stage;
+    \item EasyOCR alone versus confidence-triggered fallback;
+    \item CPU execution versus GPU execution when available; and
+    \item raw OCR output versus extracted field candidates.
+\end{enumerate}
+
+For each image, the evaluation should record the selected engine, confidence,
+elapsed time, OCR text, CER, WER, and whether fallback was used. Results should
+be aggregated over a fixed development set and confirmed on a held-out test
+set. Because the current repository documentation does not provide a completed
+metric table, numerical performance values are intentionally not reported in
+this paper.
+
+\section{Implementation Status}
+\label{sec:status}
+
+The data, preprocessing, extraction, and metric modules describe a coherent
+prototype. However, the current \texttt{src/ocr.py} contains an indentation
+error in the \texttt{group\_lines} function and cannot currently be compiled.
+The file also contains an incomplete line-grouping body with references to
+\texttt{bbox} and \texttt{text} before the required result iteration. Therefore,
+the architecture and algorithm described in Sections~\ref{sec:easyocr} and
+\ref{sec:tesseract} represent the intended implementation, but end-to-end OCR
+execution requires correcting this source defect first.
+
+\noindent This status is important for reproducibility: no claim in this paper should be
+interpreted as a successful benchmark until the OCR module is repaired and the
+evaluation notebooks are executed on a documented environment.
+
+\section{Limitations and Safety}
+\label{sec:limitations}
+
+The prototype has several technical limitations:
+
+\begin{itemize}
+    \item Mean OCR confidence is not a guarantee of correct medication text.
+    \item The fallback score is heuristic and does not measure semantic
+    correctness.
+    \item Regular expressions may miss uncommon units, abbreviations, and
+    prescription layouts.
+    \item Medicine candidates are not validated or linked to dosage and
+    frequency fields.
+    \item Base-filename indexing can overwrite files with duplicate names.
+    \item Handwriting and low-quality images may require specialized models or
+    human review.
+    \item The repository does not currently contain a complete readable test
+    suite or a reproducible final benchmark.
+\end{itemize}
+
+This system must not be used to prescribe, dispense, or change medication.
+Every recognized medicine, dosage, and frequency must be verified against the
+original prescription by a qualified reviewer. A production system would also
+require privacy controls, audit logs, calibrated confidence estimates,
+clinical validation, error analysis by prescription type, and explicit
+human-in-the-loop approval.
+
+\section{Future Work}
+\label{sec:future}
+
+Future development should first repair and test the OCR line-grouping logic.
+Additional work should include:
+
+\begin{enumerate}
+    \item unit tests for every preprocessing and extraction boundary case;
+    \item deterministic dataset manifests and duplicate-filename detection;
+    \item field-level precision, recall, and F1 evaluation;
+    \item confidence calibration and threshold tuning on a development set;
+    \item vocabulary-assisted medicine correction using the available medicine
+    lists;
+    \item association of each medicine with its dosage and frequency;
+    \item specialized handwriting recognition and layout analysis;
+    \item privacy-preserving storage and deletion policies; and
+    \item prospective human review studies before any clinical deployment.
+\end{enumerate}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper presented an inspectable hybrid OCR architecture for medical
+prescription images. The implementation combines configurable OpenCV
+preprocessing, GPU-aware EasyOCR, Tesseract fallback, simple structured-field
+extraction, and CER/WER evaluation. Its modular design supports controlled
+experiments and clear diagnosis of recognition failures. At its current stage,
+the system should be treated as an educational prototype rather than a
+clinical tool. Correcting the OCR module, adding reproducible tests, and
+reporting measured field-level results are necessary steps before the approach
+can be evaluated for practical use.
+
+\begin{thebibliography}{00}
+
+\bibitem{opencv}
+G. Bradski, ``The OpenCV Library,'' Dr. Dobb's Journal of Software Tools,
+2000.
+
+\bibitem{easyocr}
+JaidedAI, ``EasyOCR: Ready-to-use OCR with 80+ supported languages,''
+GitHub repository, accessed Nov. 5, 2026.
+
+\bibitem{tesseract}
+R. Smith, ``An Overview of the Tesseract OCR Engine,'' in
+\emph{Proc. Ninth International Conference on Document Analysis and
+Recognition}, 2007, pp. 629--633.
+
+\bibitem{levenshtein}
+V. I. Levenshtein, ``Binary codes capable of correcting deletions, insertions,
+and reversals,'' \emph{Soviet Physics Doklady}, vol. 10, no. 8, pp. 707--710,
+1966.
+
+\end{thebibliography}
+
+\end{document}

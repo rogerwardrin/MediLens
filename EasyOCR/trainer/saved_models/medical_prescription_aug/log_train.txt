@@ -1,0 +1,180 @@
+[250/5000] Train loss: 1.23130, Valid loss: 0.89396, Elapsed_time: 106.86123
+Current_accuracy : 32.436, Current_norm_ED  : 0.7710
+Best_accuracy    : 32.436, Best_norm_ED     : 0.7710
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Maxima                    | Mtxima                    | 0.0900	False
+Tridosil                  | Tjaoil                    | 0.0083	False
+--------------------------------------------------------------------------------
+[500/5000] Train loss: 0.65873, Valid loss: 0.72146, Elapsed_time: 226.28975
+Current_accuracy : 40.769, Current_norm_ED  : 0.8247
+Best_accuracy    : 40.769, Best_norm_ED     : 0.8247
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Montex                    | Montex                    | 0.1929	True
+Ace                       | Ace                       | 0.9327	True
+--------------------------------------------------------------------------------
+[750/5000] Train loss: 0.44680, Valid loss: 0.60829, Elapsed_time: 272.75161
+Current_accuracy : 46.026, Current_norm_ED  : 0.8483
+Best_accuracy    : 46.026, Best_norm_ED     : 0.8483
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Maxima                    | Maxima                    | 0.3338	True
+Fexofast                  | Fexofat                   | 0.2037	False
+--------------------------------------------------------------------------------
+[1000/5000] Train loss: 0.34058, Valid loss: 0.54681, Elapsed_time: 324.82108
+Current_accuracy : 51.154, Current_norm_ED  : 0.8674
+Best_accuracy    : 51.154, Best_norm_ED     : 0.8674
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Leptic                    | Lephic                    | 0.4696	False
+Nexum                     | Nexum                     | 0.7849	True
+--------------------------------------------------------------------------------
+[1250/5000] Train loss: 0.24416, Valid loss: 0.53016, Elapsed_time: 372.17002
+Current_accuracy : 54.231, Current_norm_ED  : 0.8744
+Best_accuracy    : 54.231, Best_norm_ED     : 0.8744
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Metsina                   | Metsina                   | 0.2608	True
+Rozith                    | Rogith                    | 0.3949	False
+--------------------------------------------------------------------------------
+[1500/5000] Train loss: 0.20300, Valid loss: 0.50384, Elapsed_time: 424.08059
+Current_accuracy : 57.308, Current_norm_ED  : 0.8839
+Best_accuracy    : 57.308, Best_norm_ED     : 0.8839
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Fenadin                   | Fonadil                   | 0.1856	False
+Napa Extend               | Napa Exlendl              | 0.1233	False
+--------------------------------------------------------------------------------
+[1750/5000] Train loss: 0.14557, Valid loss: 0.49959, Elapsed_time: 470.42506
+Current_accuracy : 57.821, Current_norm_ED  : 0.8839
+Best_accuracy    : 57.821, Best_norm_ED     : 0.8839
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Montene                   | Montene                   | 0.6146	True
+Provair                   | Provair                   | 0.9808	True
+--------------------------------------------------------------------------------
+[2000/5000] Train loss: 0.11643, Valid loss: 0.48081, Elapsed_time: 521.53429
+Current_accuracy : 59.487, Current_norm_ED  : 0.8938
+Best_accuracy    : 59.487, Best_norm_ED     : 0.8938
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Filmet                    | Fxoot                     | 0.0737	False
+Flexilax                  | Flexilax                  | 0.6577	True
+--------------------------------------------------------------------------------
+[2250/5000] Train loss: 0.08609, Valid loss: 0.47428, Elapsed_time: 567.66132
+Current_accuracy : 60.641, Current_norm_ED  : 0.8946
+Best_accuracy    : 60.641, Best_norm_ED     : 0.8946
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Axodin                    | Aaodin                    | 0.2982	False
+Telfast                   | Telfasl                   | 0.1635	False
+--------------------------------------------------------------------------------
+[2500/5000] Train loss: 0.07524, Valid loss: 0.49502, Elapsed_time: 618.92989
+Current_accuracy : 61.667, Current_norm_ED  : 0.8956
+Best_accuracy    : 61.667, Best_norm_ED     : 0.8956
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Montex                    | Montex                    | 0.6875	True
+Amodis                    | Amodis                    | 0.8376	True
+--------------------------------------------------------------------------------
+[2750/5000] Train loss: 0.05270, Valid loss: 0.47164, Elapsed_time: 665.46943
+Current_accuracy : 63.718, Current_norm_ED  : 0.9013
+Best_accuracy    : 63.718, Best_norm_ED     : 0.9013
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Beklo                     | Beklo                     | 0.8108	True
+Rhinil                    | Rhinil                    | 0.4273	True
+--------------------------------------------------------------------------------
+[3000/5000] Train loss: 0.04651, Valid loss: 0.49152, Elapsed_time: 717.75501
+Current_accuracy : 63.590, Current_norm_ED  : 0.9017
+Best_accuracy    : 63.718, Best_norm_ED     : 0.9017
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Conaz                     | Conaz                     | 0.8618	True
+Azyth                     | Azyth                     | 0.8646	True
+--------------------------------------------------------------------------------
+[3250/5000] Train loss: 0.03247, Valid loss: 0.49052, Elapsed_time: 764.07137
+Current_accuracy : 63.077, Current_norm_ED  : 0.9016
+Best_accuracy    : 63.718, Best_norm_ED     : 0.9017
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Sergel                    | Sengel                    | 0.5081	False
+Esoral                    | Esoral                    | 0.7291	True
+--------------------------------------------------------------------------------
+[3500/5000] Train loss: 0.03152, Valid loss: 0.51073, Elapsed_time: 815.33551
+Current_accuracy : 64.103, Current_norm_ED  : 0.9022
+Best_accuracy    : 64.103, Best_norm_ED     : 0.9022
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Tridosil                  | Tridosil                  | 0.6536	True
+Fexofast                  | Fexofant                  | 0.5827	False
+--------------------------------------------------------------------------------
+[3750/5000] Train loss: 0.02285, Valid loss: 0.50489, Elapsed_time: 862.85238
+Current_accuracy : 64.103, Current_norm_ED  : 0.9051
+Best_accuracy    : 64.103, Best_norm_ED     : 0.9051
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Nidazyl                   | Nidazyl                   | 0.1063	True
+Atrizin                   | Atrizin                   | 0.6671	True
+--------------------------------------------------------------------------------
+[4000/5000] Train loss: 0.01998, Valid loss: 0.52716, Elapsed_time: 913.69525
+Current_accuracy : 64.615, Current_norm_ED  : 0.9055
+Best_accuracy    : 64.615, Best_norm_ED     : 0.9055
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Montair                   | Mopazt                    | 0.1270	False
+Flugal                    | Flugal                    | 0.8881	True
+--------------------------------------------------------------------------------
+[4250/5000] Train loss: 0.01444, Valid loss: 0.51929, Elapsed_time: 959.50557
+Current_accuracy : 64.744, Current_norm_ED  : 0.9062
+Best_accuracy    : 64.744, Best_norm_ED     : 0.9062
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Bacaid                    | Bacaid                    | 0.7943	True
+Flugal                    | Flugal                    | 0.1645	True
+--------------------------------------------------------------------------------
+[4500/5000] Train loss: 0.01236, Valid loss: 0.53447, Elapsed_time: 1009.86006
+Current_accuracy : 64.744, Current_norm_ED  : 0.9056
+Best_accuracy    : 64.744, Best_norm_ED     : 0.9062
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Canazole                  | Comayle                   | 0.7654	False
+Opton                     | Opton                     | 0.7790	True
+--------------------------------------------------------------------------------
+[4750/5000] Train loss: 0.00947, Valid loss: 0.52648, Elapsed_time: 1055.21401
+Current_accuracy : 65.385, Current_norm_ED  : 0.9089
+Best_accuracy    : 65.385, Best_norm_ED     : 0.9089
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Flexilax                  | Flexilax                  | 0.8265	True
+Lucan-R                   | Lucan-R                   | 0.9625	True
+--------------------------------------------------------------------------------
+[5000/5000] Train loss: 0.00871, Valid loss: 0.55981, Elapsed_time: 1105.81237
+Current_accuracy : 65.769, Current_norm_ED  : 0.9070
+Best_accuracy    : 65.769, Best_norm_ED     : 0.9089
+--------------------------------------------------------------------------------
+Ground Truth              | Prediction                | Confidence Score & T/F
+--------------------------------------------------------------------------------
+Baclon                    | Baclon                    | 0.9702	True
+Telfast                   | eltost                    | 0.3663	False
+--------------------------------------------------------------------------------
