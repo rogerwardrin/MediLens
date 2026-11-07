@@ -38,7 +38,14 @@ ENV/
 
 # Generated training data and Python caches
 /EasyOCR/trainer/all_data/
+/EasyOCR/trainer/saved_models/
 /EasyOCR/trainer/__pycache__/
+/models/
+*.pth
+
+# Generated evaluation outputs
+/results/
+/kaggle_*.npy
 
 # Build and packaging artifacts
 build/

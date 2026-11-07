@@ -1,12 +1,15 @@
 """MediLens word-reader demo.   Run:  streamlit run streamlit_app.py"""
+import json
+
 import streamlit as st
 from PIL import Image
 
 import word_reader as wr
+from prescription_parser import build_prescription_json
 
 st.set_page_config(page_title="MediLens", page_icon="💊", layout="centered")
 st.title("MediLens: medicine name reader")
-st.caption("Upload cropped single-word images. Results are decision support only; "
+st.caption("Upload cropped single-line images (e.g. 'Tab. Covam'). Results are decision support only; "
            "always verify against the original prescription.")
 
 
@@ -26,26 +29,35 @@ except Exception as e:
 with st.sidebar:
     st.header("Settings")
     thr = st.slider("Flag threshold (disagreement)", 0.1, 0.8, wr.DEFAULT_THRESHOLD, 0.05,
-                    help="Raw OCR vs vocabulary match, normalized edit distance. "
-                         "Lower = flag more images for review.")
+                    help="Raw OCR vs best candidate, normalized edit distance. Lower = flag more for review.")
     st.write(f"Device: `{reader.device}` | Known names: {len(reader.vocab)}")
 
-files = st.file_uploader("Word images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+files = st.file_uploader("Images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
 
 if files:
     images = [Image.open(f) for f in files]
     readings = reader.read(images, threshold=thr)
-    n_flag = sum(r.flagged for r in readings)
-    st.write(f"**{len(readings)}** images, **{n_flag}** need review")
+    items = []
+    st.write(f"**{len(readings)}** images, **{sum(r.flagged for r in readings)}** need review")
     for f, im, r in zip(files, images, readings):
         with st.container(border=True):
             c1, c2 = st.columns([1, 2])
             c1.image(im, caption=f.name, use_container_width=True)
+            form = r.form or "not written"
             if r.flagged:
                 c2.warning("Unverified. Needs review")
                 c2.markdown(f"Raw OCR (rough guess): **{r.raw or '(nothing read)'}**")
                 c2.markdown("Closest known names: " + ", ".join(f"`{c}`" for c in r.candidates))
             else:
-                c2.success(f"Match: **{r.match}**")
+                c2.success(f"**{r.name}**   |   form: {form}")
                 c2.markdown(f"Raw OCR: `{r.raw}`")
             c2.caption(f"Disagreement {r.disagreement:.2f} (threshold {thr:.2f})")
+        items.append({"raw_text": r.raw, "name": None if r.flagged else r.name,
+                      "name_candidates": r.candidates, "form": None if r.flagged else r.form,
+                      "dosage": None, "frequency": None, "instructions": [],
+                      "needs_review": r.flagged, "source_file": f.name})
+    doc = build_prescription_json(items, source_image=None)
+    with st.expander("JSON for the database"):
+        st.json(doc)
+    st.download_button("Download JSON", json.dumps(doc, indent=2, ensure_ascii=False),
+                       file_name="prescription.json", mime="application/json")

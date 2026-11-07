@@ -1,8 +1,10 @@
-"""Single-word medicine-name reader.
+"""Medicine-name reader: reads a cropped word image and returns form + name.
 
-Loads the EasyOCR-trainer CRNN checkpoint, reads a cropped word image two ways
-(greedy decode, and CTC-likelihood scoring against a known-name vocabulary), and
-flags the result when the two disagree.
+Loads the EasyOCR-trainer CRNN checkpoint and reads a crop two ways:
+  1. greedy decode (plain OCR text), and
+  2. CTC-likelihood scoring of every known name, bare and with a written form prefix
+     ("Tab ", "Cap. " ...). The best candidate gives the name AND the form.
+If the two readings disagree strongly, the result is flagged for review.
 
 Configure with environment variables, or edit the defaults below:
     MEDILENS_TRAINER  folder containing the EasyOCR trainer's model.py / utils.py
@@ -22,6 +24,8 @@ import torch.nn.functional as F
 import yaml
 from PIL import Image
 
+from prescription_parser import DEFAULT_FORMS, build_candidates, edit_distance
+
 HERE = Path(__file__).resolve().parent
 TRAINER = Path(os.environ.get("MEDILENS_TRAINER", r"D:\Projects\MediLens\EasyOCR\trainer"))
 CKPT = Path(os.environ.get(
@@ -31,30 +35,27 @@ CONFIG = Path(os.environ.get(
     "MEDILENS_CONFIG", str(TRAINER / "config_files" / "medical_prescription.yaml")))
 VOCAB = Path(os.environ.get("MEDILENS_VOCAB", str(HERE / "vocab.txt")))
 
-DEFAULT_THRESHOLD = 0.3   # flag when normalized edit distance(raw, vocab pick) exceeds this
-
-
-def edit_distance(a: str, b: str) -> int:
-    prev = list(range(len(b) + 1))
-    for i, ca in enumerate(a, 1):
-        cur = [i]
-        for j, cb in enumerate(b, 1):
-            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
-        prev = cur
-    return prev[-1]
+DEFAULT_THRESHOLD = 0.4   # flag when edit distance(raw, best candidate) / len(candidate) exceeds this
+CHUNK = 256               # candidates scored per CTC call (bounds memory)
 
 
 @dataclass
 class Reading:
-    raw: str                 # plain greedy OCR output
-    match: str               # best vocabulary name
-    disagreement: float      # edit_distance(raw, match) / len(match); 1.0 if raw is empty
-    flagged: bool            # True -> do not trust the vocabulary match
-    candidates: list = field(default_factory=list)   # top vocabulary names, best first
+    raw: str                 # plain greedy OCR output (includes any written 'Tab'/'Cap')
+    name: str                # best known name
+    form: str                # 'tablet' | 'capsule' | ... | None (no form written)
+    surface: str             # the winning candidate text, e.g. 'Tab. Covam'
+    disagreement: float      # edit_distance(raw, surface) / len(surface); 1.0 if raw is empty
+    flagged: bool            # True -> do not trust the match
+    candidates: list = field(default_factory=list)   # top known names, best first
+
+    @property
+    def match(self):         # kept for older code
+        return self.name
 
 
 class WordReader:
-    def __init__(self, device=None, threshold=DEFAULT_THRESHOLD):
+    def __init__(self, device=None, threshold=DEFAULT_THRESHOLD, forms=DEFAULT_FORMS):
         for p in (TRAINER / "model.py", TRAINER / "utils.py", CKPT, CONFIG, VOCAB):
             if not Path(p).exists():
                 raise FileNotFoundError(f"Missing file: {p}")
@@ -87,7 +88,14 @@ class WordReader:
         bad = {c for n in self.vocab for c in n if c not in allowed}
         if bad:
             raise ValueError(f"Vocabulary has characters the model cannot output: {sorted(bad)}")
-        self.v_text, self.v_len = self.converter.encode(self.vocab)
+
+        # every name, bare and with each form prefix (name-major order)
+        self.cands, self.n_var = build_candidates(self.vocab, forms)
+        self.chunks = []
+        for s in range(0, len(self.cands), CHUNK):
+            texts = [c[0] for c in self.cands[s:s + CHUNK]]
+            v_text, v_len = self.converter.encode(texts)
+            self.chunks.append((len(texts), v_text, v_len))
 
     def _prep(self, im: Image.Image) -> torch.Tensor:
         im = im.convert("L")
@@ -102,30 +110,39 @@ class WordReader:
     @torch.no_grad()
     def read(self, images, threshold=None, top_k=3):
         thr = self.threshold if threshold is None else threshold
-        V = len(self.vocab)
+        starts = np.arange(len(self.vocab)) * self.n_var
         results = []
-        for i in range(0, len(images), 32):
-            chunk = images[i:i + 32]
-            x = torch.stack([self._prep(im) for im in chunk]).to(self.device)
+        for i in range(0, len(images), 16):
+            x = torch.stack([self._prep(im) for im in images[i:i + 16]]).to(self.device)
             out = self.model(x, torch.zeros(len(x), 1, dtype=torch.long, device=self.device))
 
-            idx = out.argmax(2).view(-1).cpu()
-            sizes = torch.IntTensor([out.size(1)] * len(x))
-            raws = self.converter.decode_greedy(idx, sizes)
+            # plain greedy decode (collapse repeats, drop blanks)
+            raws = []
+            for row in out.argmax(2).cpu().tolist():
+                s, prev = [], 0
+                for k in row:
+                    if k != 0 and k != prev:
+                        s.append(self.converter.character[k])
+                    prev = k
+                raws.append("".join(s))
 
             logp = out.log_softmax(2).float().cpu()
             T, C = logp.size(1), logp.size(2)
-            in_len = torch.full((V,), T, dtype=torch.int32)
             for b, raw in enumerate(raws):
-                lp = logp[b][:, None, :].expand(T, V, C).contiguous()
-                nll = F.ctc_loss(lp, self.v_text, in_len, self.v_len, blank=0,
-                                 reduction="none", zero_infinity=False)
-                nll = torch.nan_to_num(nll, nan=1e9, posinf=1e9)   # impossible names rank last
-                order = torch.argsort(nll)[:top_k].tolist()
-                cands = [self.vocab[k] for k in order]
-                match = cands[0]
-                dis = 1.0 if not raw else edit_distance(raw, match) / max(len(match), 1)
-                results.append(Reading(raw, match, dis, dis > thr, cands))
+                nll = np.empty(len(self.cands), dtype=np.float32)
+                col = 0
+                for n, v_text, v_len in self.chunks:
+                    lp = logp[b][:, None, :].expand(T, n, C).contiguous()
+                    loss = F.ctc_loss(lp, v_text, torch.full((n,), T, dtype=torch.int32), v_len,
+                                      blank=0, reduction="none", zero_infinity=False)
+                    nll[col:col + n] = torch.nan_to_num(loss, nan=1e9, posinf=1e9).numpy()
+                    col += n
+                best = int(nll.argmin())
+                surface, name, form = self.cands[best]
+                per_name = np.minimum.reduceat(nll, starts)             # best score per name, any form
+                top = [self.vocab[k] for k in np.argsort(per_name)[:top_k]]
+                dis = 1.0 if not raw else edit_distance(raw, surface) / max(len(surface), 1)
+                results.append(Reading(raw, name, form, surface, dis, dis > thr, top))
         return results
 
 
@@ -134,5 +151,5 @@ if __name__ == "__main__":
     reader = WordReader()
     paths = sys.argv[1:]
     for p, r in zip(paths, reader.read([Image.open(p) for p in paths])):
-        print(f"{p}: raw={r.raw!r} match={r.match!r} disagree={r.disagreement:.2f} "
+        print(f"{p}: raw={r.raw!r} -> form={r.form} name={r.name!r} disagree={r.disagreement:.2f} "
               f"{'FLAGGED' if r.flagged else 'ok'} candidates={r.candidates}")
