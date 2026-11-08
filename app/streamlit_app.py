@@ -28,8 +28,8 @@ except Exception as e:
 
 with st.sidebar:
     st.header("Settings")
-    thr = st.slider("Flag threshold (disagreement)", 0.1, 0.8, wr.DEFAULT_THRESHOLD, 0.05,
-                    help="Raw OCR vs best candidate, normalized edit distance. Lower = flag more for review.")
+    thr = st.slider("Flag threshold (margin)", 0.0, 6.0, wr.DEFAULT_THRESHOLD, 0.1,
+                help="Gap between the best and second-best known name. Higher = flag more for review.")
     st.write(f"Device: `{reader.device}` | Known names: {len(reader.vocab)}")
 
 files = st.file_uploader("Images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
@@ -51,8 +51,8 @@ if files:
             else:
                 c2.success(f"**{r.name}**   |   form: {form}")
                 c2.markdown(f"Raw OCR: `{r.raw}`")
-            c2.caption(f"Disagreement {r.disagreement:.2f} (threshold {thr:.2f})")
-        items.append({"raw_text": r.raw, "name": None if r.flagged else r.name,
+            c2.caption(f"Margin {r.margin:.2f} (flagged below {thr:.2f}) | raw-vs-match disagreement {r.disagreement:.2f}")
+        items.append({"margin": round(r.margin, 3),"raw_text": r.raw, "name": None if r.flagged else r.name,
                       "name_candidates": r.candidates, "form": None if r.flagged else r.form,
                       "dosage": None, "frequency": None, "instructions": [],
                       "needs_review": r.flagged, "source_file": f.name})

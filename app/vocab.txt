@@ -437,7 +437,6 @@ Mupirocin
 My D
 My-d
 Mycophenolate
-Na Dard
 Namenda
 Napa
 Napa Extend
@@ -462,6 +461,7 @@ Nitrofurantoin
 Nitroglycerin
 Nizoder
 Nizoral
+Nodard
 Nolvadex
 Norethisterone
 Norfloxacin

@@ -30,12 +30,12 @@ HERE = Path(__file__).resolve().parent
 TRAINER = Path(os.environ.get("MEDILENS_TRAINER", r"D:\Projects\MediLens\EasyOCR\trainer"))
 CKPT = Path(os.environ.get(
     "MEDILENS_CKPT",
-    str(TRAINER / "saved_models" / "medical_prescription_aug" / "best_accuracy.pth")))
+    r"D:\Projects\MediLens\models\kaggle_e400_fall_best.pth"))
 CONFIG = Path(os.environ.get(
     "MEDILENS_CONFIG", str(TRAINER / "config_files" / "medical_prescription.yaml")))
 VOCAB = Path(os.environ.get("MEDILENS_VOCAB", str(HERE / "vocab.txt")))
 
-DEFAULT_THRESHOLD = 0.4   # flag when edit distance(raw, best candidate) / len(candidate) exceeds this
+DEFAULT_THRESHOLD = 2.30   # flag when margin (gap to the 2nd-best name, length-normalised NLL) is below this
 CHUNK = 256               # candidates scored per CTC call (bounds memory)
 
 
@@ -46,6 +46,7 @@ class Reading:
     form: str                # 'tablet' | 'capsule' | ... | None (no form written)
     surface: str             # the winning candidate text, e.g. 'Tab. Covam'
     disagreement: float      # edit_distance(raw, surface) / len(surface); 1.0 if raw is empty
+    margin: float            # score gap between the best and second-best known name
     flagged: bool            # True -> do not trust the match
     candidates: list = field(default_factory=list)   # top known names, best first
 
@@ -91,6 +92,7 @@ class WordReader:
 
         # every name, bare and with each form prefix (name-major order)
         self.cands, self.n_var = build_candidates(self.vocab, forms)
+        self.cand_len = np.array([len(c[0]) for c in self.cands], dtype=np.float32)
         self.chunks = []
         for s in range(0, len(self.cands), CHUNK):
             texts = [c[0] for c in self.cands[s:s + CHUNK]]
@@ -137,12 +139,17 @@ class WordReader:
                                       blank=0, reduction="none", zero_infinity=False)
                     nll[col:col + n] = torch.nan_to_num(loss, nan=1e9, posinf=1e9).numpy()
                     col += n
+                nll = nll / self.cand_len                     # length-normalised, as in the evaluation
                 best = int(nll.argmin())
                 surface, name, form = self.cands[best]
-                per_name = np.minimum.reduceat(nll, starts)             # best score per name, any form
-                top = [self.vocab[k] for k in np.argsort(per_name)[:top_k]]
+                per_name = np.minimum.reduceat(nll, starts)   # best score per name, any form
+                order = np.argsort(per_name)
+                top = [self.vocab[k] for k in order[:top_k]]
+                margin = float(per_name[order[1]] - per_name[order[0]])
                 dis = 1.0 if not raw else edit_distance(raw, surface) / max(len(surface), 1)
-                results.append(Reading(raw, name, form, surface, dis, dis > thr, top))
+                results.append(Reading(raw=raw, name=name, form=form, surface=surface,
+                                        disagreement=dis, margin=margin,
+                                        flagged=margin < thr, candidates=top))
         return results
 
 

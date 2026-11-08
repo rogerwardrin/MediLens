@@ -32,6 +32,9 @@ FORM_SURFACES = {            # normalised form -> written abbreviations (lowerca
 SURFACE_TO_FORM = {s: f for f, ss in FORM_SURFACES.items() for s in ss}
 DEFAULT_FORMS = ("tablet", "capsule")      # the forms your photos actually show
 
+# dose sanity limits (per single value); anything above is flagged as implausible, not rejected
+MAX_PLAUSIBLE = {"mg": 2000, "mcg": 5000, "ug": 5000, "g": 10, "ml": 100, "iu": 1_000_000, "%": 100}
+
 
 def edit_distance(a: str, b: str) -> int:
     prev = list(range(len(b) + 1))
@@ -54,6 +57,62 @@ def build_candidates(names, forms=DEFAULT_FORMS):
                 prefixes.append((f"{text}{punct} ", f))
     cands = [(p + n, n, f) for n in names for p, f in prefixes]
     return cands, len(prefixes)
+
+
+# ---------------------------------------------------------------- OCR digit repair
+# Letters the recogniser tends to emit where a digit was written.
+DIGIT_LOOKALIKE = {"O": "0", "o": "0", "l": "1", "I": "1"}
+_DL = "OolI"
+_UNIT_AHEAD = r"(?=\s*(?:mg|mcg|µg|μg|ug|ml|iu|g)(?![a-z]))"
+# a number (optionally 5/80 or 5-80) made of digits and look-alike letters, directly before a unit
+_NUM_BEFORE_UNIT_RE = re.compile(
+    rf"(?<![A-Za-z0-9])([\d{_DL}]+(?:[./\-][\d{_DL}]+)*){_UNIT_AHEAD}", re.I)
+# three or four slots of a 1+0+1 style schedule written with look-alike letters
+_SLOT = rf"[0-3{_DL}½]"
+_SCHED_FIX_RE = re.compile(
+    rf"(?<![\w/.\-+])({_SLOT})\s*([+\-–])\s*({_SLOT})\s*([+\-–])\s*({_SLOT})(?:\s*([+\-–])\s*({_SLOT}))?(?![\w.])")
+_UNIT_MISREAD_RE = re.compile(r"(?<=\d)(\s*)(?:rng|rnq|mq|rnc)(?![a-z])", re.I)   # 'mg' read as 'rng' etc.
+
+
+def _to_digits(s):
+    return "".join(DIGIT_LOOKALIKE.get(c, c) for c in s)
+
+
+def fix_ocr_digits(text):
+    """Repair classic OCR confusions in dose / schedule positions only (never inside the medicine name).
+    Returns (fixed_text, list_of_corrections). Any correction should make the caller flag the line for review."""
+    fixes = []
+
+    def unit_sub(m):
+        fixes.append(m.group(0).strip())
+        return m.group(1) + "mg"
+    text = _UNIT_MISREAD_RE.sub(unit_sub, text)
+
+    def num_sub(m):
+        old = m.group(1)
+        new = _to_digits(old)
+        if new == old or not any(c.isdigit() for c in new):   # nothing to fix, or no real digit at all
+            return old
+        fixes.append(f"{old}->{new}")
+        return new
+    text = _NUM_BEFORE_UNIT_RE.sub(num_sub, text)
+
+    def sched_sub(m):
+        g = m.groups()
+        slots = [g[0], g[2], g[4]] + ([g[6]] if g[6] else [])
+        seps = [g[1], g[3]] + ([g[5]] if g[5] else [])
+        new_slots = [_to_digits(s) for s in slots]
+        if new_slots == slots:
+            return m.group(0)
+        if not any(s.isdigit() for s in new_slots):
+            return m.group(0)
+        out = new_slots[0]
+        for sep, s in zip(seps, new_slots[1:]):
+            out += sep + s
+        fixes.append(f"{m.group(0).strip()}->{out}")
+        return out
+    text = _SCHED_FIX_RE.sub(sched_sub, text)
+    return text, fixes
 
 
 # ---------------------------------------------------------------- parsing
@@ -86,10 +145,16 @@ def _num(s):
     return 0.5 if s == "½" else float(s)
 
 
-def parse_line(text, names=None, max_name_dist=0.34):
-    """Parse one line such as 'Tab. Covam 5/80mg 1+0+1 after meals' into a record."""
+def parse_line(text, names=None, max_name_dist=0.34, expect_dose=False):
+    """Parse one line such as 'Tab. Covam 5/80mg 1+0+1 after meals' into a record.
+    expect_dose=True flags the line when no dose could be read."""
     work = RX_RE.sub("", text or "")
     review = []
+
+    # --- repair look-alike letters in dose / schedule positions (flags the line when it fires)
+    work, digit_fixes = fix_ocr_digits(work)
+    if digit_fixes:
+        review.append("digits_corrected")
 
     # --- form: written abbreviation at the start of the line
     form, form_raw = None, None
@@ -112,6 +177,9 @@ def parse_line(text, names=None, max_name_dist=0.34):
         dosage = {"values": [int(v) if v.is_integer() else v for v in values],
                   "unit": m.group("u").lower().replace("µ", "u").replace("μ", "u"), "raw": m.group(0).strip()}
         work = _cut(work, m)
+        cap = MAX_PLAUSIBLE.get(dosage["unit"])
+        if cap is not None and any(v > cap or v <= 0 for v in dosage["values"]):
+            review.append("dose_implausible")
 
     # --- frequency
     frequency = None
@@ -159,6 +227,8 @@ def parse_line(text, names=None, max_name_dist=0.34):
     if dosage is None and nums:
         dosage = {"values": [int(nums[0])], "unit": None, "raw": nums[0]}
         review.append("dosage_unit_missing")
+    if dosage is None and expect_dose:
+        review.append("dosage_missing")
 
     # --- name: snap to the known list when given
     name, verified, cands = name_raw, False, []
@@ -174,7 +244,17 @@ def parse_line(text, names=None, max_name_dist=0.34):
 
     return {"raw_text": text, "name": name or None, "name_verified": verified, "name_candidates": cands,
             "form": form, "form_raw": form_raw, "dosage": dosage, "frequency": frequency,
-            "instructions": instructions, "needs_review": bool(review), "review_reasons": review}
+            "instructions": instructions, "digit_fixes": digit_fixes,
+            "needs_review": bool(review), "review_reasons": review}
+
+
+# reasons that concern the medicine name / form rather than dose, frequency or instructions
+NAME_FORM_REASONS = {"name_unverified", "name_missing", "form_uncertain"}
+
+
+def dose_review_reasons(record):
+    """Review reasons about dosage / frequency only. Use when the name is verified elsewhere (word_reader)."""
+    return [r for r in record["review_reasons"] if r not in NAME_FORM_REASONS]
 
 
 def build_prescription_json(items, source_image=None):
@@ -223,6 +303,33 @@ def _selftest():
     r = check("Tab Qwertyxyz 10mg", name_verified=False, needs_review=True)  # not in the list -> raw text kept, flagged
     assert r["name"] == "Qwertyxyz"
     r = check("Az", form=None)                                               # short name is not mistaken for a form
+
+    # --- garbled digits: repaired AND flagged for review
+    r = check("Tab Napa 5Omg", name="Napa", dosage={"values": [50], "unit": "mg"}, needs_review=True)
+    assert "digits_corrected" in r["review_reasons"]
+    r = check("Tab Napa 5OO mg", dosage={"values": [500], "unit": "mg"}, needs_review=True)
+    r = check("Tab Napa 500rng", dosage={"values": [500], "unit": "mg"}, needs_review=True)
+    assert "digits_corrected" in r["review_reasons"]
+    r = check("Tab Napa 500mg l+0+l", frequency={"code": "1+0+1", "times_per_day": 2}, needs_review=True)
+    assert "digits_corrected" in r["review_reasons"]
+    r = check("Tab Napa 5l mg", dosage={"values": [51], "unit": "mg"}, needs_review=True)
+    # the repair must never touch the medicine name or clean lines
+    r = check("Tab Covam 5/80mg", name="Covam", needs_review=False)
+    assert r["digit_fixes"] == []
+    r = check("Tab Ascoril 5ml", name="Ascoril", needs_review=False)
+    assert r["digit_fixes"] == []
+    r = parse_line("Cap Omez 20mg", ["Omez"])                                # 'O' in a name stays a letter
+    assert r["name"] == "Omez" and r["dosage"]["values"] == [20] and r["digit_fixes"] == []
+    # --- dose flags
+    r = check("Tab Napa 5000mg", dosage={"values": [5000], "unit": "mg"}, needs_review=True)
+    assert "dose_implausible" in r["review_reasons"]
+    r = parse_line("Tab Napa", names, expect_dose=True)
+    assert "dosage_missing" in r["review_reasons"]
+    r = parse_line("Tab Napa", names)                                        # absent dose is fine unless expected
+    assert "dosage_missing" not in r["review_reasons"]
+    r = parse_line("Tab Napa 5Omg")
+    assert dose_review_reasons(r) == ["digits_corrected"], dose_review_reasons(r)   # name reasons filtered out
+
     doc = build_prescription_json([parse_line("tab covam 5-80mg 1+0+1", names)], "x.png")
     json.loads(json.dumps(doc))
     print("all parser self-tests passed")
