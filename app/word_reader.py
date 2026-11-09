@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from types import SimpleNamespace
 
+import re
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -49,11 +51,31 @@ class Reading:
     margin: float            # score gap between the best and second-best known name
     flagged: bool            # True -> do not trust the match
     candidates: list = field(default_factory=list)   # top known names, best first
+    reason: str = None       # why the gate vetoed this crop, if it did    
 
     @property
     def match(self):         # kept for older code
         return self.name
 
+FORM_WORDS = ("tab", "cap", "tablet", "capsule", "syp", "syr", "inj", "susp", "drops", "oint", "cream")
+HEADER_WORDS = {"name", "age", "sex", "date", "rx", "wt", "ht", "bp", "pulse", "reg", "regd", "weight",
+                "height", "mobile", "phone", "cell", "address", "chamber", "patient", "advice", "follow", "sign"}
+
+
+def non_name_reason(raw):
+    """Cheap checks on the raw read. Returns why the crop is probably not a medicine name, or None."""
+    t = raw.strip()
+    letters = re.sub(r"[^A-Za-z]", "", t).lower()
+    if len(letters) < 3:
+        return "too_short"
+    if letters in HEADER_WORDS:
+        return "header_word"
+    if any(abs(len(letters) - len(w)) <= 1 and edit_distance(letters, w) <= 1 for w in FORM_WORDS):
+        return "form_word_only"
+    digits = sum(c.isdigit() for c in t)
+    if digits >= 2 and digits / max(len(t.replace(" ", "")), 1) >= 0.3:
+        return "mostly_digits"
+    return None
 
 class WordReader:
     def __init__(self, device=None, threshold=DEFAULT_THRESHOLD, forms=DEFAULT_FORMS):
@@ -110,7 +132,7 @@ class WordReader:
         return torch.from_numpy(out)[None]
 
     @torch.no_grad()
-    def read(self, images, threshold=None, top_k=3):
+    def read(self, images, threshold=None, top_k=3, gate= False):
         thr = self.threshold if threshold is None else threshold
         starts = np.arange(len(self.vocab)) * self.n_var
         results = []
@@ -147,9 +169,11 @@ class WordReader:
                 top = [self.vocab[k] for k in order[:top_k]]
                 margin = float(per_name[order[1]] - per_name[order[0]])
                 dis = 1.0 if not raw else edit_distance(raw, surface) / max(len(surface), 1)
+                reason = non_name_reason(raw)
                 results.append(Reading(raw=raw, name=name, form=form, surface=surface,
                                         disagreement=dis, margin=margin,
-                                        flagged=margin < thr, candidates=top))
+                                        flagged=(margin < thr) or (gate and reason is not None),
+                                        candidates=top, reason=reason))
         return results
 
 

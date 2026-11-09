@@ -16,6 +16,7 @@ Aldactone
 Alendronate
 Aleve
 Alfacalcidol
+Algin
 Allegra
 Allopurinol
 Alprazolam
@@ -88,9 +89,12 @@ Betnovate
 Biaxin
 Bicozin
 Bifilac
+Biofol
 Bisacodyl
 Bisleri
 Bisoprolol
+Bizoran
+Bopam
 Breaky
 Breeky
 Brimonidine
@@ -103,10 +107,12 @@ Buscopan
 Cal-D
 Calamine
 Calbo
+Calbo-D
 Calcitriol
 Calcium Carbonate
 Calcium Sandoz
 Calpol
+Camlodin
 Canagliflozin
 Canazole
 Candesartan
@@ -145,6 +151,7 @@ Chloroquine
 Chlorpheniramine
 Cholecalciferol
 Cialis
+Cildif
 Cinnarizine
 Cipralex
 Cipro
@@ -159,6 +166,7 @@ Clomid
 Clomiphene
 Clonazepam
 Clonidine
+Clopid
 Clopidogrel
 Clotrimazole
 Cloxacillin
@@ -171,7 +179,9 @@ Conaz
 Concor
 Contramal
 Corex
+Cortan
 Cotrimoxazole
+Cotson
 Covam
 Cremaffin
 Creon
@@ -191,14 +201,17 @@ Dancel
 Dapagliflozin
 Dapsone
 Deflazacort
+Deflux
 Denixil
 Depakote
 Dermovate
 Desloratadine
 Dettol
 Dexamethasone
+Dexlan
 Dexorange
 Dextromethorphan
+Diasulin
 Diazepam
 Diclofenac
 Dicloran
@@ -216,12 +229,14 @@ Disprin
 Distalgasic
 Distalgesic
 Ditropan
+Docopa
 Dolo
 Dolonex
 Domperidone
 Donepezil
 Dorzolamide
 Doxazosin
+Doxiva
 Doxycycline
 Dulcolax
 Duloxetine
@@ -236,6 +251,7 @@ Electral
 Elimite
 Eltroxin
 Emeset
+Emistat
 Empagliflozin
 Enalapril
 Eno
@@ -245,15 +261,18 @@ Erythromycin
 Escitalopram
 Esomeprazole
 Esonix
+Esonix-M
 Esoral
 Ethambutol
 Ethamsylate
 Etizin
 Etoricoxib
+Etorix
 Evion
 Evista
 Exium
 Ezetimibe
+Ezylife
 Famciclovir
 Famotidine
 Fasigyn
@@ -272,6 +291,7 @@ Fexofast
 Fexofenadine
 Filmet
 Finasteride
+Finix
 Fixal
 Fixit
 Flagyl
@@ -287,6 +307,7 @@ Flunarizine
 Fluoxetine
 Fluticasone
 Folic Acid
+Folison
 Folvite
 Formoterol
 Fortum
@@ -294,6 +315,7 @@ Fosamax
 Fosfomycin
 Fucidin
 Furadantin
+Furocef
 Furosemide
 Fusidic Acid
 Gabapentin
@@ -364,9 +386,11 @@ Levofloxacin
 Levosalbutamol
 Levothyroxine
 Lexapro
+Lijenta
 Limcee
 Linagliptin
 Linezolid
+Lipicon
 Lipiget
 Lipitor
 Lisinopril
@@ -388,6 +412,7 @@ Macrobid
 Magnesium Hydroxide
 Maxima
 Maxpro
+Maxpro Mups
 Mebendazole
 Mebeverine
 Mefenamic Acid
@@ -437,9 +462,11 @@ Mupirocin
 My D
 My-d
 Mycophenolate
+Myolax
 Namenda
 Napa
 Napa Extend
+Napadol
 Naproxen
 Nasivion
 Nebil
@@ -465,6 +492,7 @@ Nodard
 Nolvadex
 Norethisterone
 Norfloxacin
+Norium
 Nortriptyline
 Norvasc
 Novidat
@@ -496,9 +524,11 @@ Pan D
 Panadol
 Pancreatin
 Pantocid
+Pantonix
 Pantop
 Pantoprazole
 Paracetamol
+Paricel
 Paroxetine
 Pedialyte
 Pegalax
@@ -551,8 +581,10 @@ Razo
 Refresh Tears
 Reglan
 Relispray
+Remmo
 Renova
 Retin-A
+Reversair
 Revital
 Rhinil
 Riboflavin
@@ -568,6 +600,7 @@ Rizatriptan
 Roaccutane
 Rocephin
 Rogaine
+Rolac
 Romycin
 Ropinirole
 Rosuvastatin
@@ -597,6 +630,7 @@ Sitagliptin
 Sodium Bicarbonate
 Soframycin
 Softovac
+Solas
 Solifenacin
 Sompraz
 Spasmonil
@@ -626,7 +660,9 @@ Tetracycline
 Theophylline
 Thiamine
 Thiocolchicoside
+Thyrin
 Thyronorm
+Thyrox
 Timolol
 Tindamax
 Tinidazole
@@ -675,6 +711,7 @@ Vibact
 Vicks
 Vifas
 Vildagliptin
+Viset
 Volini
 Voltaren
 Voltarol
